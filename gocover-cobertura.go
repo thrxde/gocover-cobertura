@@ -141,7 +141,7 @@ func (cov *Coverage) parseProfiles(profiles []*Profile, pkgMap map[string]*packa
 	}
 	cov.LinesValid = cov.NumLines()
 	cov.LinesCovered = cov.NumLinesWithHits()
-	cov.LineRate = cov.HitRate()
+	cov.LineRate.LineRate = attrFloat(cov.HitRate())
 	return nil
 }
 
@@ -190,7 +190,7 @@ func (cov *Coverage) parseProfile(profile *Profile, pkgPkg *packages.Package, ig
 		profile:  profile,
 	}
 	ast.Walk(visitor, parsed)
-	pkg.LineRate = pkg.HitRate()
+	pkg.LineRate.LineRate = attrFloat(pkg.HitRate())
 	return nil
 }
 
@@ -208,15 +208,15 @@ func (v *fileVisitor) Visit(node ast.Node) ast.Visitor {
 	case *ast.FuncDecl:
 		class := v.class(n)
 		method := v.method(n)
-		method.LineRate = method.Lines.HitRate()
-		if method.LineRate > 0 {
-			method.BranchRate = 1
+		method.LineRate.LineRate = attrFloat(method.Lines.HitRate())
+		if method.LineRate.LineRate > 0 {
+			method.BranchRate.BranchRate = 1.0
 		}
 		class.Methods = append(class.Methods, method)
 		for _, line := range method.Lines {
 			class.Lines = append(class.Lines, line)
 		}
-		class.LineRate = class.Lines.HitRate()
+		class.LineRate.LineRate = attrFloat(class.Lines.HitRate())
 	}
 	return v
 }

@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 )
 
 type Coverage struct {
-	XMLName         xml.Name   `xml:"coverage"`
-	LineRate        float32    `xml:"line-rate,attr"`
-	BranchRate      float32    `xml:"branch-rate,attr"`
+	XMLName xml.Name `xml:"coverage"`
+	LineRate
+	BranchRate
 	Version         string     `xml:"version,attr"`
 	Timestamp       int64      `xml:"timestamp,attr"`
 	LinesCovered    int64      `xml:"lines-covered,attr"`
@@ -19,33 +20,48 @@ type Coverage struct {
 	Packages        []*Package `xml:"packages>package"`
 }
 
+type attrFloat float32
+
+type LineRate struct {
+	LineRate attrFloat `xml:"line-rate,attr"`
+}
+
+type BranchRate struct {
+	BranchRate attrFloat `xml:"branch-rate,attr"`
+}
+
+func (f attrFloat) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
+	s := fmt.Sprintf("%.1f", f)
+	return xml.Attr{Name: name, Value: s}, nil
+}
+
 type Source struct {
 	Path string `xml:",chardata"`
 }
 
 type Package struct {
-	Name       string   `xml:"name,attr"`
-	LineRate   float32  `xml:"line-rate,attr"`
-	BranchRate float32  `xml:"branch-rate,attr"`
+	Name string `xml:"name,attr"`
+	LineRate
+	BranchRate
 	Complexity float32  `xml:"complexity,attr"`
 	Classes    []*Class `xml:"classes>class"`
 }
 
 type Class struct {
-	Name       string    `xml:"name,attr"`
-	Filename   string    `xml:"filename,attr"`
-	LineRate   float32   `xml:"line-rate,attr"`
-	BranchRate float32   `xml:"branch-rate,attr"`
+	Name     string `xml:"name,attr"`
+	Filename string `xml:"filename,attr"`
+	LineRate
+	BranchRate
 	Complexity float32   `xml:"complexity,attr"`
 	Methods    []*Method `xml:"methods>method"`
 	Lines      Lines     `xml:"lines>line"`
 }
 
 type Method struct {
-	Name       string  `xml:"name,attr"`
-	Signature  string  `xml:"signature,attr"`
-	LineRate   float32 `xml:"line-rate,attr"`
-	BranchRate float32 `xml:"branch-rate,attr"`
+	Name      string `xml:"name,attr"`
+	Signature string `xml:"signature,attr"`
+	LineRate
+	BranchRate
 	Complexity float32 `xml:"complexity,attr"`
 	Lines      Lines   `xml:"lines>line"`
 }
